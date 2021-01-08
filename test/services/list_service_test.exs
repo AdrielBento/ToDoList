@@ -36,4 +36,25 @@ defmodule Services.ListServiceTest do
                 ]
               }}
   end
+
+  test "should return error when not find an item in the list" do
+    item = %Item{description: "Do the math work"}
+    list = %List{name: 'Homework', items: [item]}
+
+    assert ListService.check_item(list, "BANANA") == {:error, "Item not found"}
+  end
+
+  test "must uncheck an item in the list" do
+    item = %Item{description: "Do the math work"}
+    list = %List{name: 'Homework', items: [item]}
+
+    assert ListService.uncheck_item(list, "Do the math work") ==
+             {:ok,
+              %List{
+                name: 'Homework',
+                items: [
+                  %Item{description: "Do the math work", done: false}
+                ]
+              }}
+  end
 end
