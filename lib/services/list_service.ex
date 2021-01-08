@@ -1,11 +1,19 @@
 defmodule Services.ListService do
-  alias Entities.{List, Item}
 
   def create(list_name) do
-    {:ok, %List{name: list_name}}
+    {:ok, %Entities.List{name: list_name}}
   end
 
-  def add_item(list = %List{items: list_items}, item) do
-    {:ok, %List{list | items: list_items ++ [item]}}
+  def add_item(list = %Entities.List{items: list_items}, item) do
+    {:ok, %Entities.List{list | items: list_items ++ [item]}}
+  end
+
+  def check_item(list = %Entities.List{items: list_items}, item_description) do
+    item = Enum.find(list_items, &(&1.description == item_description))
+    list_items = List.delete(list_items, item)
+
+    item = %Entities.Item{item | done: true}
+
+    {:ok, %Entities.List{list | items: list_items ++ [item]}}
   end
 end
