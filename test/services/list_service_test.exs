@@ -1,8 +1,20 @@
 defmodule Services.ListServiceTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   alias Services.ListService
   alias Entities.{List, Item}
+
+  setup [:list_data_provider]
+
+  defp list_data_provider(_context) do
+    {:ok,
+     list: %List{
+       name: 'Homework',
+       items: [
+         %Item{description: "Do the math work"}
+       ]
+     }}
+  end
 
   test "must create a new to-do list" do
     assert ListService.create('Homework') ==
@@ -23,11 +35,8 @@ defmodule Services.ListServiceTest do
               }}
   end
 
-  test "must check an item in the list" do
-    item = %Item{description: "Do the math work"}
-    list = %List{name: 'Homework', items: [item]}
-
-    assert ListService.check_item(list, "Do the math work") ==
+  test "must check an item in the list", context do
+    assert ListService.check_item(context[:list], "Do the math work") ==
              {:ok,
               %List{
                 name: 'Homework',
@@ -37,18 +46,12 @@ defmodule Services.ListServiceTest do
               }}
   end
 
-  test "should return error when not find an item in the list" do
-    item = %Item{description: "Do the math work"}
-    list = %List{name: 'Homework', items: [item]}
-
-    assert ListService.check_item(list, "BANANA") == {:error, "Item not found"}
+  test "should return error when not find an item in the list", context do
+    assert ListService.check_item(context[:list], "BANANA") == {:error, "Item not found"}
   end
 
-  test "must uncheck an item in the list" do
-    item = %Item{description: "Do the math work"}
-    list = %List{name: 'Homework', items: [item]}
-
-    assert ListService.uncheck_item(list, "Do the math work") ==
+  test "must uncheck an item in the list", context do
+    assert ListService.uncheck_item(context[:list], "Do the math work") ==
              {:ok,
               %List{
                 name: 'Homework',
@@ -58,11 +61,8 @@ defmodule Services.ListServiceTest do
               }}
   end
 
-  test "must remove a item from the list" do
-    item = %Item{description: "Do the math work"}
-    list = %List{name: 'Homework', items: [item]}
-
-    assert ListService.remove_item(list, "Do the math work") ==
+  test "must remove a item from the list", context do
+    assert ListService.remove_item(context[:list], "Do the math work") ==
              {:ok,
               %List{
                 name: 'Homework',
