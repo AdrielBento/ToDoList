@@ -52,7 +52,7 @@ defmodule Services.ListServiceTest do
   end
 
   test "must remove an item from the list", context do
-    assert ListService.remove_item(context[:list], "Do the math work") ==
+    assert ListService.remove_item(context[:list], %Item{description: "Do the math work"}) ==
              {:ok, %List{context[:list] | items: []}}
   end
 end
