@@ -28,22 +28,17 @@ defmodule Services.ListServiceTest do
     assert ListService.add_item(list, item) ==
              {:ok,
               %List{
-                name: 'Homework',
-                items: [
-                  %Item{description: "Do the math work"}
-                ]
+                list
+                | items: [
+                    %Item{description: "Do the math work"}
+                  ]
               }}
   end
 
   test "must check an item in the list", context do
     assert ListService.check_item(context[:list], "Do the math work") ==
              {:ok,
-              %List{
-                name: 'Homework',
-                items: [
-                  %Item{description: "Do the math work", done: true}
-                ]
-              }}
+              %List{context[:list] | items: [%Item{description: "Do the math work", done: true}]}}
   end
 
   test "should return error when not find an item in the list", context do
@@ -53,20 +48,11 @@ defmodule Services.ListServiceTest do
   test "must uncheck an item in the list", context do
     assert ListService.uncheck_item(context[:list], "Do the math work") ==
              {:ok,
-              %List{
-                name: 'Homework',
-                items: [
-                  %Item{description: "Do the math work", done: false}
-                ]
-              }}
+              %List{context[:list] | items: [%Item{description: "Do the math work", done: false}]}}
   end
 
-  test "must remove a item from the list", context do
+  test "must remove an item from the list", context do
     assert ListService.remove_item(context[:list], "Do the math work") ==
-             {:ok,
-              %List{
-                name: 'Homework',
-                items: []
-              }}
+             {:ok, %List{context[:list] | items: []}}
   end
 end
