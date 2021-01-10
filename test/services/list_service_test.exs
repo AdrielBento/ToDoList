@@ -57,4 +57,16 @@ defmodule Services.ListServiceTest do
                 ]
               }}
   end
+
+  test "must remove a item from the list" do
+    item = %Item{description: "Do the math work"}
+    list = %List{name: 'Homework', items: [item]}
+
+    assert ListService.remove_item(list, "Do the math work") ==
+             {:ok,
+              %List{
+                name: 'Homework',
+                items: []
+              }}
+  end
 end

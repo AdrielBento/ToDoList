@@ -35,8 +35,19 @@ defmodule Services.ListService do
     end
   end
 
+  def remove_item(list = %Entities.List{items: list_items}, item_description) do
+    case find_item_by_description(list_items, item_description) do
+      {:error, message} ->
+        {:error, message}
+
+      {:ok, item} ->
+        list_items = List.delete(list_items, item)
+        {:ok, %Entities.List{list | items: list_items}}
+    end
+  end
+
   @spec find_item_by_description(any, any) :: any
-  def find_item_by_description(list_items, item_description) do
+  defp find_item_by_description(list_items, item_description) do
     item = Enum.find(list_items, &(&1.description == item_description))
 
     case item do
