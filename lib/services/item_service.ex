@@ -4,71 +4,53 @@ defmodule Services.ItemService do
     {:ok, %Entities.List{list | items: list_items ++ [item]}}
   end
 
-  @spec check_item(Entities.List.t(), Entities.Item.t() | String.t()) :: {:ok, Entities.List.t()}
-  def check_item(list = %Entities.List{items: list_items}, item) do
-    fn list, item ->
-      list_items = List.delete(list_items, item)
-      item = %Entities.Item{item | done: true}
-      {:ok, %Entities.List{list | items: list_items ++ [item]}}
+  @spec check_item(Entities.List.t(), Entities.Item.t() | String.t()) ::
+          {:ok, Entities.List.t()} | {:error, :item_not_found}
+  def check_item(list = %Entities.List{}, item) do
+    case maybe_find_item(list.items, item) do
+      nil ->
+        {:error, :item_not_found}
+
+      item ->
+        list = delete_item_from_list(item, list)
+        item = %Entities.Item{item | done: true}
+        {:ok, %Entities.List{list | items: list.items ++ [item]}}
     end
-    |> findItem(list, item)
   end
 
   @spec uncheck_item(Entities.List.t(), Entities.Item.t() | String.t()) ::
-          {:ok, Entities.List.t()}
-  def uncheck_item(list = %Entities.List{items: list_items}, item) do
-    fn list, item ->
-      list_items = List.delete(list_items, item)
-      item = %Entities.Item{item | done: false}
-      {:ok, %Entities.List{list | items: list_items ++ [item]}}
+          {:ok, Entities.List.t()} | {:error, :item_not_found}
+  def uncheck_item(list = %Entities.List{}, item) do
+    case maybe_find_item(list.items, item) do
+      nil ->
+        {:error, :item_not_found}
+
+      item ->
+        list = delete_item_from_list(item, list)
+        item = %Entities.Item{item | done: false}
+        {:ok, %Entities.List{list | items: list.items ++ [item]}}
     end
-    |> findItem(list, item)
   end
 
-  @spec remove_item(Entities.List.t(), Entities.Item.t() | String.t()) :: {:ok, Entities.List.t()}
+  @spec remove_item(Entities.List.t(), Entities.Item.t() | String.t()) ::
+          {:ok, Entities.List.t()} | {:error, :item_not_found}
   def remove_item(list = %Entities.List{}, item) do
-    fn list, item ->
-      list_items = List.delete(list.items, item)
-      {:ok, %Entities.List{list | items: list_items}}
-    end
-    |> findItem(list, item)
-  end
-
-  defp findItem(
-         callback,
-         list = %Entities.List{},
-         %Entities.Item{description: item_description}
-       ) do
-    case find_item_by_description(list.items, item_description) do
-      {:error, message} ->
-        {:error, message}
-
-      {:ok, item} ->
-        callback.(list, item)
+    case maybe_find_item(list.items, item) do
+      nil -> {:error, :item_not_found}
+      item -> {:ok, delete_item_from_list(item, list)}
     end
   end
 
-  defp findItem(
-         callback,
-         list = %Entities.List{},
-         item_description
-       ) do
-    case find_item_by_description(list.items, item_description) do
-      {:error, message} ->
-        {:error, message}
-
-      {:ok, item} ->
-        callback.(list, item)
-    end
+  @spec delete_item_from_list(Entities.Item.t(), Entities.List.t()) :: Entities.List.t()
+  defp delete_item_from_list(item = %Entities.Item{}, list = %Entities.List{}) do
+    %Entities.List{list | items: List.delete(list.items, item)}
   end
 
-  @spec find_item_by_description(any, any) :: any
-  defp find_item_by_description(list_items, item_description) do
-    item = Enum.find(list_items, &(&1.description == item_description))
+  defp maybe_find_item(list_items, %Entities.Item{description: item_description}) do
+    maybe_find_item(list_items, item_description)
+  end
 
-    case item do
-      nil -> {:error, "Item not found"}
-      _ -> {:ok, item}
-    end
+  defp maybe_find_item(list_items, item_description) do
+    Enum.find(list_items, &(&1.description == item_description))
   end
 end

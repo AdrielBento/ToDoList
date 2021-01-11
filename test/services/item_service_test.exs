@@ -30,24 +30,22 @@ defmodule Services.ItemServiceTest do
               }}
   end
 
-  test "must check an item in the list", context do
-    assert ItemService.check_item(context[:list], "Do the math work") ==
-             {:ok,
-              %List{context[:list] | items: [%Item{description: "Do the math work", done: true}]}}
+  test "must check an item in the list", %{list: list} do
+    assert {:ok, %List{items: [%Item{description: "Do the math work", done: true}]}} =
+             ItemService.check_item(list, "Do the math work")
   end
 
-  test "should return error when not find an item in the list", context do
-    assert ItemService.check_item(context[:list], "BANANA") == {:error, "Item not found"}
+  test "should return error when not find an item in the list", %{list: list} do
+    assert {:error, :item_not_found} = ItemService.check_item(list, "BANANA")
   end
 
-  test "must uncheck an item in the list", context do
-    assert ItemService.uncheck_item(context[:list], "Do the math work") ==
-             {:ok,
-              %List{context[:list] | items: [%Item{description: "Do the math work", done: false}]}}
+  test "must uncheck an item in the list", %{list: list} do
+    assert {:ok, %List{items: [%Item{done: false}]}} =
+             ItemService.uncheck_item(list, "Do the math work")
   end
 
-  test "must remove an item from the list", context do
-    assert ItemService.remove_item(context[:list], %Item{description: "Do the math work"}) ==
-             {:ok, %List{context[:list] | items: []}}
+  test "must remove an item from the list", %{list: list} do
+    assert {:ok, %List{items: []}} =
+             ItemService.remove_item(list, %Item{description: "Do the math work"})
   end
 end
